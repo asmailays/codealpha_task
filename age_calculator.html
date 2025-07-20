@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Age Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;}
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#4e54c8,#8f94fb);
+      padding:1rem;
+    }
+    .card{
+      background:#fff;
+      padding:2rem 2.5rem;
+      border-radius:1rem;
+      box-shadow:0 8px 20px rgba(0,0,0,0.1);
+      width:100%;
+      max-width:420px;
+    }
+    h1{font-size:1.75rem;text-align:center;margin-bottom:1.5rem;color:#4e54c8;}
+    form{
+      display:grid;
+      gap:1rem;
+      grid-template-columns:repeat(3,1fr);
+    }
+    label{
+      font-size:.85rem;
+      color:#555;
+    }
+    input{
+      margin-top:.25rem;
+      width:100%;
+      padding:.5rem .75rem;
+      border:1px solid #ccc;
+      border-radius:.5rem;
+      font-size:1rem;
+      background:#fafafa;
+    }
+    input:focus{outline:none;border-color:#4e54c8;background:#fff;}
+    .actions{
+      grid-column:1/-1;
+      text-align:center;
+      margin-top:1.25rem;
+    }
+    button{
+      padding:.6rem 1.5rem;
+      border:none;
+      border-radius:.5rem;
+      background:#4e54c8;
+      color:#fff;
+      font-size:1rem;
+      cursor:pointer;
+      transition:background .2s ease;
+    }
+    button:hover{background:#3c40a4;}
+    .output,.error{
+      grid-column:1/-1;
+      margin-top:1rem;
+      text-align:center;
+      font-size:1.1rem;
+    }
+    .output span{font-weight:bold;}
+    .error{color:#c0392b;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Age Calculator</h1>
+    <form id="ageForm" novalidate>
+      <div>
+        <label for="day">Day</label>
+        <input type="number" id="day" name="day" placeholder="DD" min="1" max="31" required>
+      </div>
+      <div>
+        <label for="month">Month</label>
+        <input type="number" id="month" name="month" placeholder="MM" min="1" max="12" required>
+      </div>
+      <div>
+        <label for="year">Year</label>
+        <input type="number" id="year" name="year" placeholder="YYYY" min="1900" required>
+      </div>
+      <div class="actions">
+        <button type="submit">Calculate</button>
+      </div>
+      <div class="output" id="output"></div>
+      <div class="error" id="error"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('ageForm');
+    const output = document.getElementById('output');
+    const errorEl = document.getElementById('error');
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorEl.textContent='';
+      output.textContent='';
+
+      const day = parseInt(form.day.value,10);
+      const month = parseInt(form.month.value,10);
+      const year = parseInt(form.year.value,10);
+
+      if(!validateDate(day, month, year)){
+        errorEl.textContent = 'Please enter a valid past date.';
+        return;
+      }
+
+      const birthDate = new Date(year, month-1, day);
+      const today = new Date();
+
+      if(birthDate > today){
+        errorEl.textContent = 'Birth date cannot be in the future.';
+        return;
+      }
+
+      const age = calculateAge(birthDate, today);
+      output.innerHTML = `You are <span>${age.years}</span> years, <span>${age.months}</span> months, and <span>${age.days}</span> days old.`;
+    });
+
+    function validateDate(d, m, y){
+      if(Number.isNaN(d)||Number.isNaN(m)||Number.isNaN(y)) return false;
+      if(m<1||m>12||d<1||d>31) return false;
+      const testDate = new Date(y, m-1, d);
+      return testDate.getFullYear() === y && testDate.getMonth() === m-1 && testDate.getDate() === d;
+    }
+
+    function calculateAge(birth, today){
+      let years = today.getFullYear() - birth.getFullYear();
+      let months = today.getMonth() - birth.getMonth();
+      let days = today.getDate() - birth.getDate();
+
+      if(days < 0){
+        months -= 1;
+        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        days += prevMonth;
+      }
+
+      if(months < 0){
+        years -= 1;
+        months += 12;
+      }
+
+      return {years, months, days};
+    }
+  </script>
+</body>
+</html>
